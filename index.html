@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webentwicklung To-Do App</title>
+
+    <style>
+
+        .dragging {
+    opacity: 0.5;
+}
+
+        body {
+            background-color: #eef2f7;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #6a0dad;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        section {
+            background-color: #f8f9fa;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 700px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #6a0dad;
+        }
+
+        input {
+            padding: 10px;
+            width: 60%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        ol#liste {
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            background-color: #d0e7ff;
+            transition: background 0.3s;
+        }
+
+        li span {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        li span.fertig {
+            text-decoration: line-through;
+            color: gray;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        li button {
+            margin-left: 5px;
+            font-size: 14px;
+        }
+
+        button.hoch {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        button.runter {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        button.loeschen {
+            background-color: #f44336;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            li button {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Hallo, ich bin Andrei</h1>
+        <p>Meine To-Do App für Webentwicklung</p>
+    </header>
+
+    <section>
+        <h2>Meine To-Do Liste</h2>
+
+     <input type="text" id="eingabe" placeholder="Neue Aufgabe">
+
+<select id="kategorie">
+    <option value="Allgemein">Allgemein</option>
+    <option value="Lernen">Lernen</option>
+    <option value="Arbeit">Arbeit</option>
+    <option value="Persönlich">Persönlich</option>
+</select>
+
+<button onclick="hinzufuegen()">Hinzufügen</button>
+<button onclick="listeUmkehren()">🔄 Reihenfolge umkehren</button>
+
+<ol id="liste"></ol>
+
+
+    </section>
+
+    <footer>
+        <p>Kontakt: andrei@example.com</p>
+        <a href="https://github.com" target="_blank">GitHub Profil</a>
+    </footer>
+
+    <script>
+
+
+
+   let obenEinfuegen = false;
+
+// ✅ Neue Aufgabe erstellen
+function neueAufgabe(text, fertig = false, kategorie = "Allgemein") {
+    let li = document.createElement("li");
+    li.draggable = true;
+    li.addEventListener("dragstart", () => {
+    li.classList.add("dragging");
+});
+
+li.addEventListener("dragend", () => {
+    li.classList.remove("dragging");
+    speichern();
+});
+
+    let span = document.createElement("span");
+    span.innerText = text;
+    if (fertig) span.classList.add("fertig");
+
+    span.onclick = function () {
+        span.classList.toggle("fertig");
+        speichern();
+    };
+
+    let label = document.createElement("small");
+    label.innerText = kategorie;
+    label.style.marginLeft = "10px";
+
+    let hoch = document.createElement("button");
+    hoch.innerText = "⬆️";
+    hoch.onclick = function (e) {
+        e.stopPropagation();
+        let vorher = li.previousElementSibling;
+        if (vorher) {
+            li.parentNode.insertBefore(li, vorher);
+            speichern();
+        }
+    };
+
+    let runter = document.createElement("button");
+    runter.innerText = "⬇️";
+    runter.onclick = function (e) {
+        e.stopPropagation();
+        let nachher = li.nextElementSibling;
+        if (nachher) {
+            li.parentNode.insertBefore(nachher, li);
+            speichern();
+        }
+    };
+
+    let loeschen = document.createElement("button");
+    loeschen.innerText = "❌";
+    loeschen.onclick = function (e) {
+        e.stopPropagation();
+        li.remove();
+        speichern();
+    };
+
+    li.appendChild(span);
+    li.appendChild(label);
+    li.appendChild(hoch);
+    li.appendChild(runter);
+    li.appendChild(loeschen);
+
+    let liste = document.getElementById("liste");
+
+    if (obenEinfuegen) {
+        liste.prepend(li);
+    } else {
+        liste.appendChild(li);
+    }
+}
+
+
+function getDragAfterElement(container, y) {
+    const elements = [...container.querySelectorAll("li:not(.dragging)")];
+
+    return elements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+
+// ✅ Button hinzufügen
+function hinzufuegen() {
+    let eingabe = document.getElementById("eingabe");
+    let kategorie = document.getElementById("kategorie").value;
+    let text = eingabe.value.trim();
+
+    if (text === "") return;
+
+    neueAufgabe(text, false, kategorie);
+    speichern();
+
+    eingabe.value = "";
+}
+
+// ✅ Speichern
+function speichern() {
+    let todos = [];
+
+    document.querySelectorAll("#liste li").forEach(li => {
+        let span = li.querySelector("span");
+        let label = li.querySelector("small");
+
+        todos.push({
+            text: span.innerText,
+            fertig: span.classList.contains("fertig"),
+            kategorie: label.innerText
+        });
+    });
+
+    localStorage.setItem("todos", JSON.stringify(todos));
+    localStorage.setItem("obenEinfuegen", obenEinfuegen);
+}
+
+// ✅ Laden
+function laden() {
+    let daten = localStorage.getItem("todos");
+    if (!daten) return;
+
+    let modus = localStorage.getItem("obenEinfuegen");
+    if (modus !== null) {
+        obenEinfuegen = (modus === "true");
+    }
+
+    let liste = JSON.parse(daten);
+    liste.forEach(item => neueAufgabe(item.text, item.fertig, item.kategorie));
+}
+
+// ✅ Liste umkehren
+function listeUmkehren() {
+    let liste = document.getElementById("liste");
+    let items = Array.from(liste.children);
+
+    items.reverse().forEach(item => {
+        liste.appendChild(item);
+    });
+
+    obenEinfuegen = !obenEinfuegen;
+    speichern();
+}
+
+// ✅ Beim Start laden
+window.onload = laden;
+
+const liste = document.getElementById("liste");
+
+liste.addEventListener("dragover", (e) => {
+    e.preventDefault();
+
+    const dragging = document.querySelector(".dragging");
+    const afterElement = getDragAfterElement(liste, e.clientY);
+
+    if (afterElement == null) {
+        liste.appendChild(dragging);
+    } else {
+        liste.insertBefore(dragging, afterElement);
+    }
+});
+
+
+    </script>
+
+</body>
+
+</html>
